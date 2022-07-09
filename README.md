@@ -1,22 +1,34 @@
 # bon-API-tit
 
-## Résumé
+## En quelques mots
 
 bonAPItit permet d'organiser des repas en ville satisfaisant le plus grand nombre de personnes ! Particulièrement adapté aux repas entre collègues, bonAPItit vous trouve les meilleurs choix près de votre lieu de travail (ou autre !). 
 
 Organisez un groupe, donnez le code aux participants, et laissez bonAPItit vous conseiller !
 
-## Fonctionnalités prévues
 
-Un utilisateur créé un groupe sur l'API. Il passe les informations suivantes :
-+ Le nom de son groupe (name)
-+ Une addresse de départ (address)
-+ Une distance maximale en mètres (entier radius, de 1000 à 50000)
+## Fonctionnalités et endpoints
 
-L'API lui retourne alors, en cas de succès, les informations suivantes :
-+ Un lien permettant de vérifier la géolocalisation 
-+ Un code utilisateurs à six caractères
-+ Son code administrateur à douze caractères
+Un utilisateur créé un groupe de repas sur l'API.
+
+**POST /api/v1/groups**
+        Body {
+            "name": string (ex: "Repas MVMS"), 
+            "address": string human readable (ex: "28 rue de la paix Tourcoing"), 
+            "radius": integer de 1000 à 50000, représentant le rayon jusqu'auquel l'API doit trouver des restaurants, en mètres (ex: 5000)
+        }
+
+L'API en cas de succès répond avec les informations suivantes :
+{
+    "id": id du groupe,
+    "name": nom du groupe tel que fourni par l'utilisateur,
+    "address": adresse human readable telle que fournie par l'utilisateur,
+    "latlng": coordonnées latitude/longitude géocodée pour l'adresse, en string (ex: "47.794762,-4.292968"),
+    "address_visualization": string URL google maps permettant de rapidement vérifier la précision du geocoding (ex: "http://www.google.com/maps/place/47.794762,-4.292968"),
+    "radius": rayon tel que fourni par l'utilisateur,
+    "registration_code": string de six caractères hexadecimaux permettant à des utilisateurs de rejoindre le groupe (ex: "42ae84"),
+    "admin_code": string de douze caractères (dont les six premiers sont le registration_code) permettant au créateur du groupe d'en modifier les informations et de récupérer la liste de restaurants complète (ex: "42ae8445f7f9")
+}
 
 L'API récupère via Google Places jusqu'à 20 restaurants les plus pertinents (popularité, note) présents dans le radius donné.
 
