@@ -25,13 +25,9 @@ class Group < ApplicationRecord
         end
     end
 
-    # Useful sortings
-    # Group.restaurants.order(google_rating: :desc)
     def geocode
-        res = HTTParty.get("https://api.mapbox.com/geocoding/v5/mapbox.places/#{self.address.gsub(' ','_')}.json?access_token=#{ENV['MAPBOX_API_KEY']}&country=FR")
+        res = HTTParty.get("https://api.mapbox.com/geocoding/v5/mapbox.places/#{self.address.parameterize(separator: "%20")}.json?access_token=#{ENV['MAPBOX_API_KEY']}&country=FR")
         list = JSON.parse res.body
-        p list
-        p list["features"][0]
         coordinates = list["features"][0]["center"]
         self.latlng = coordinates.reverse.join(",")
         self.address_visualization = "http://www.google.com/maps/place/#{self.latlng}"

@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2022_07_09_074227) do
+ActiveRecord::Schema.define(version: 2022_07_09_140343) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -49,6 +49,7 @@ ActiveRecord::Schema.define(version: 2022_07_09_074227) do
     t.datetime "updated_at", precision: 6, null: false
     t.float "distance_in_km"
     t.boolean "currently_in_radius", default: true
+    t.integer "cached_weighted_score"
     t.index ["group_id"], name: "index_restaurants_on_group_id"
   end
 
