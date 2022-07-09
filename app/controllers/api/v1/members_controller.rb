@@ -25,6 +25,6 @@ class Api::V1::MembersController < ActionController::API
 
     def render_error
         render json: { errors: @member.errors.full_messages },
-          status: :unprocessable_entity
+        status: :unprocessable_entity
       end
 end

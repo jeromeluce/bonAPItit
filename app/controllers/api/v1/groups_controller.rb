@@ -6,7 +6,7 @@ class Api::V1::GroupsController < ActionController::API
     def create
         @group = Group.new(group_params)
         if @group.save
-            BuildGroupRestaurantsList.perform_later @group
+            BuildGroupRestaurantsListJob.perform_later @group
             render :show, status: :created
         else
             render_error
@@ -18,7 +18,7 @@ class Api::V1::GroupsController < ActionController::API
             if @group.saved_change_to_radius? || @group.saved_change_to_address?
                 @group.geocode
                 @group.save
-                BuildGroupRestaurantsList.perform_later @group
+                BuildGroupRestaurantsListJob.perform_later @group
             end
             render :show, status: "200"
         else
@@ -56,11 +56,11 @@ class Api::V1::GroupsController < ActionController::API
 
     def render_error
         render json: { errors: @group.errors.full_messages },
-          status: :unprocessable_entity
+        status: :unprocessable_entity
     end
 
     def render_unauthorized
         render json: { errors: "You are not allowed to use this resource" },
-          status: "401"
+        status: "401"
     end
 end

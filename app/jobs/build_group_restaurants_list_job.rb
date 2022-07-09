@@ -1,4 +1,4 @@
-class BuildGroupRestaurantsList < ApplicationJob
+class BuildGroupRestaurantsListJob < ApplicationJob
     queue_as :default
   
     def perform(group)
@@ -18,7 +18,7 @@ class BuildGroupRestaurantsList < ApplicationJob
                         address: restaurant["vicinity"],
                         lat: restaurant["geometry"]["location"]["lat"],
                         lng: restaurant["geometry"]["location"]["lng"],
-                        distance_in_km: Geocoder::Calculations.distance_between([grouplat, grouplng], [restaurant["geometry"]["location"]["lat"].to_f, restaurant["geometry"]["location"]["lng"].to_f], { units: :km }),
+                        distance_in_km: Geocoder::Calculations.distance_between([grouplat, grouplng], [restaurant["geometry"]["location"]["lat"].to_f, restaurant["geometry"]["location"]["lng"].to_f], { units: :km })&.round(3),
                         google_rating: restaurant["rating"],
                         google_place_id: restaurant["place_id"],
                         group_id: group.id
@@ -32,7 +32,7 @@ class BuildGroupRestaurantsList < ApplicationJob
                     address: restaurant["vicinity"],
                     lat: restaurant["geometry"]["location"]["lat"],
                     lng: restaurant["geometry"]["location"]["lng"],
-                    distance_in_km: Geocoder::Calculations.distance_between([grouplat, grouplng], [restaurant["geometry"]["location"]["lat"].to_f, restaurant["geometry"]["location"]["lng"].to_f], { units: :km }),
+                    distance_in_km: Geocoder::Calculations.distance_between([grouplat, grouplng], [restaurant["geometry"]["location"]["lat"].to_f, restaurant["geometry"]["location"]["lng"].to_f], { units: :km })&.round(3),
                     google_rating: restaurant["rating"],
                     google_place_id: restaurant["place_id"],
                     group_id: group.id

@@ -3,7 +3,7 @@ class Group < ApplicationRecord
     has_many :members
     has_many :restaurants
     validates :name, :address, :radius, presence: true
-    validates :radius, numericality: { only_integer: true, greater_than_or_equal_to: 1000, greater_than_or_equal_to: 50000 }
+    validates :radius, numericality: { only_integer: true, greater_than_or_equal_to: 1000, less_than_or_equal_to: 50000 }
     
     def geocode
         res = HTTParty.get("https://api.mapbox.com/geocoding/v5/mapbox.places/#{self.address.parameterize(separator: "%20")}.json?access_token=#{ENV['MAPBOX_API_KEY']}&country=FR")
