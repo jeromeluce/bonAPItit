@@ -71,6 +71,7 @@ L'API en cas de succès répond avec les informations suivantes :
 {
     "restaurants": array de maximum 20 restaurants [
         {
+            "id" : id du restaurant, permettant le vote du membre (ex: 2)
             "name": string contenant le nom du restaurant (ex: "Le truck by Les Temps Gourmands"),
             "address": string human readable de l'adresse (ex: "5818F Kerverret, Plomeur"),
             "google_rating": float à une décimale maximum correspondant à l'aggrégat des notes laissées sur google reviews (ex: 5.0),
@@ -80,21 +81,77 @@ L'API en cas de succès répond avec les informations suivantes :
     
 }
 ```
+
 Tout utilisateur peut, pour chaque restaurant de la liste, émettre un vote positif(upvote) ou négatif(downvote). Il ne connait pas les votes des autres, uniquement le créateur du groupe peut obtenir cette information. 
 
-Le code administrateur, lui, permet de modifier les informations de l'événement (adresse, nom, radius).
+**POST /api/v1/restaurants/:restaurant_id/upvote_restaurant**
+**POST /api/v1/restaurants/:restaurant_id/downvote_restaurant**
+```
+{
+    "member_code": string de six caractères obtenue à la création du membre (ex: "84d0fc")
+}
+```
 
-En cas de changement d'adresse ou de radius, un background job vient remettre la liste à jour.
+L'API en cas de succès répond avec les informations suivantes :
+```
+{
+    "vote_registered": string "Success",
+    "restaurant": string contenant le nom du restaurant (ex: "O Resto Du Bourg")
+}
+```
 
-Les restaurants qui ne se trouvent plus dans la liste après ces changements sont néanmoins gardés en DB pour garantir la permanence des votes émis.
+Le créateur du groupe peut récupérer sa propre version de la liste de restaurants contenant des informations sur les membres et qui est classée selon un score qui est la somme du score google reviews et des votes des membres (+1 ou -1 par vote).
 
-Un endpoint permet au créateur de récupérer une liste classée de restaurants correspondant aux attentes des autres participants (en prenant en compte leurs votes, mais aussi la note donnée par les reviews Google, une simple somme des deux sert au classement)
+**POST /api/v1/groups/:group_id/owner_restaurants_list**
+```
 
-+ Nom
-+ Distance depuis le lieu de travail (à vol d'oiseau)
-+ Score donné par les upvotes/downvotes des utilisateurs (cached_weighted_score)
-+ Note Google Reviews
+{
+    "admin_code": string de douze caractères obtenue lors de la création du groupe (ex: "42ae8445f7f9")
+}
+```
 
-De plus, le créateur reçoit aussi :
-+ Nombre total de membres pour son événement
-+ Liste des allergies, par personne ayant renseigné une liste d'allergies
+L'API en cas de succès répond avec les informations suivantes :
+```
+{   
+    "name": string correspondant au nom du groupe (ex: "Repas MVMS"),
+    "address": string human readable de l'adresse (ex: "5818F Kerverret, Plomeur"),
+    "radius": integer rappelant le rayon du groupe (ex: 45000),
+    "members": integer représentant le nombre de membres ayant rejoint le groupe (ex: 67),
+    "member_allergies" array contenant les informations d'allergies si remplies par les membres [
+        {
+            "name": string contenant le nom du membre ayant renseigné des allergies (ex: "Jean Marc"),
+            "allergy": string contenant les allergies renseignées (ex: "Couscous de chou-fleur")
+        }
+    ]
+    "restaurants": array de maximum 20 restaurants [
+        {
+            "name": string contenant le nom du restaurant (ex: "Le truck by Les Temps Gourmands"),
+            "address": string human readable de l'adresse (ex: "5818F Kerverret, Plomeur"),
+            "google_rating": float à une décimale maximum correspondant à l'aggrégat des notes laissées sur google reviews (ex: 5.0),
+            "distance_in_km": float à trois décimales maximum montrant en kilomètres et à vol d'oiseau la distance entre le point d'origine du groupe et le restaurant (ex: 5.468),
+            "cached_weighted_score": integer représentant la somme des upvotes/downvotes du restaurant par les membres du groupe (ex: -42)
+        }
+    ]
+    
+}
+```
+
+L'organisateur peut à tout moment changer les informations de son groupe.
+
+**PATCH /api/v1/groups/:group_id**
+```
+Body {
+    "admin_code": string de douze caractères nécessaire pour vérifier l'identité de l'organisateur (ex: "42ae8445f7f9"),
+    "name": string (ex: "Repas MVMS"), 
+    "address": string human readable (ex: "28 rue de la paix Tourcoing"), 
+    "radius": integer de 1000 à 50000, représentant le rayon jusqu'auquel l'API doit trouver des restaurants, en mètres (ex: 5000)
+}
+```
+
+Il est à noter que tout changement de la valeur *address* ou *radius* relance un background job allant chercher jusqu'à 20 nouveaux restaurants. Les restaurants qui ne sont plus dans le nouveau rayon de la potentielle nouvelle adresse ne seront plus montrés dans les listes, mais toujours gardés en base de donnée afin de garantir la permanence des votes effectués par les membres (dans le cas d'un futur changement de *radius* ou *address* faisant ressortir à nouveau des résultats présents précédemment).
+
+## Accéder à cette API
+
+L'API est actuellement hostée sur Heroku à l'adresse suivante : **https://young-cove-27686.herokuapp.com/api/v1/**
+
+Elle sera très probablement mise hors service d'ici la fin du mois de Juillet 2022.
