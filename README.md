@@ -12,13 +12,16 @@ Organisez un groupe, donnez le code aux participants, et laissez bonAPItit vous 
 Un utilisateur créé un groupe de repas sur l'API.
 
 **POST /api/v1/groups**
-        Body {
-            "name": string (ex: "Repas MVMS"), 
-            "address": string human readable (ex: "28 rue de la paix Tourcoing"), 
-            "radius": integer de 1000 à 50000, représentant le rayon jusqu'auquel l'API doit trouver des restaurants, en mètres (ex: 5000)
-        }
+```
+Body {
+    "name": string (ex: "Repas MVMS"), 
+    "address": string human readable (ex: "28 rue de la paix Tourcoing"), 
+    "radius": integer de 1000 à 50000, représentant le rayon jusqu'auquel l'API doit trouver des restaurants, en mètres (ex: 5000)
+}
+```
 
 L'API en cas de succès répond avec les informations suivantes :
+```
 {
     "id": id du groupe,
     "name": nom du groupe tel que fourni par l'utilisateur,
@@ -29,7 +32,7 @@ L'API en cas de succès répond avec les informations suivantes :
     "registration_code": string de six caractères hexadecimaux permettant à des utilisateurs de rejoindre le groupe (ex: "42ae84"),
     "admin_code": string de douze caractères (dont les six premiers sont le registration_code) permettant au créateur du groupe d'en modifier les informations et de récupérer la liste de restaurants complète (ex: "42ae8445f7f9")
 }
-
+```
 L'API récupère via Google Places jusqu'à 20 restaurants les plus pertinents (popularité, note) présents dans le radius donné.
 
 Le code utilisateurs permet à d'autres utilisateurs de s'inscrire à l'événement.
