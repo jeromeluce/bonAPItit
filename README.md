@@ -85,6 +85,7 @@ L'API en cas de succès répond avec les informations suivantes :
 Tout utilisateur peut, pour chaque restaurant de la liste, émettre un vote positif(upvote) ou négatif(downvote). Il ne connait pas les votes des autres, uniquement le créateur du groupe peut obtenir cette information. 
 
 **POST /api/v1/restaurants/:restaurant_id/upvote_restaurant**
+
 **POST /api/v1/restaurants/:restaurant_id/downvote_restaurant**
 ```
 {
