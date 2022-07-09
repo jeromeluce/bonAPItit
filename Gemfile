@@ -19,12 +19,26 @@ gem 'puma', '~> 5.0'
 # Add dotenv to use env vars in dev and test
 gem 'dotenv-rails', groups: [:development, :test]
 
+# Render json with ease
+gem 'jbuilder'
 # Use Active Storage variant
 # gem 'image_processing', '~> 1.2'
+
+# Background jobs
+gem 'redis'
+gem 'sidekiq'
+
+# To calculate distance from latitude & longitude 
+gem 'geocoder'
 
 # Reduces boot times through caching; required in config/boot.rb
 gem 'bootsnap', '>= 1.4.4', require: false
 
+# Allow Members to vote on restaurants
+gem 'acts_as_votable'
+
+# Prettier external API calls
+gem 'httparty'
 # Use Rack CORS for handling Cross-Origin Resource Sharing (CORS), making cross-origin AJAX possible
 # gem 'rack-cors'
 

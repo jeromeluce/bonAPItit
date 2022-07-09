@@ -1,0 +1,1 @@
+json.extract! @group, :id, :name, :address, :latlng, :address_visualization, :radius
