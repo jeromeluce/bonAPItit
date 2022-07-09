@@ -1,7 +1,8 @@
 class Member < ApplicationRecord
   belongs_to :group
   before_create :generate_code
-  validates :name, presence: true
+  validates :name, presence: true, length: { minimum: 2, maximum: 100 }
+  validates :allergies, length: { maximum: 250 }
   private
 
   def generate_code
