@@ -2,21 +2,43 @@ class BuildGroupRestaurantsList < ApplicationJob
     queue_as :default
   
     def perform(group)
+        all_group_restaurants = Group.find(group.id).restaurants
         restaurants = get_top_20_restaurants(group.latlng, group.radius)
         grouplat = group.latlng.split(",")[0].to_f
         grouplng = group.latlng.split(",")[1].to_f
-        restaurants["results"].each do |restaurant|
-            Restaurant.create(
-                name: restaurant["name"],
-                address: restaurant["vicinity"],
-                lat: restaurant["geometry"]["location"]["lat"],
-                lng: restaurant["geometry"]["location"]["lng"],
-                distance_in_km: Geocoder::Calculations.distance_between([grouplat, grouplng], [restaurant["geometry"]["location"]["lat"].to_f, restaurant["geometry"]["location"]["lng"].to_f], { units: :km }),
-                google_rating: restaurant["rating"],
-                google_place_id: restaurant["place_id"],
-                group_id: group.id
-            )
-            
+        if all_group_restaurants.length > 0
+            all_group_restaurants.each do |restaurant|
+                restaurant.currently_in_radius = false
+                restaurant.save 
+            end
+            restaurants["results"].each do |restaurant|
+                unless all_group_restaurants.find_by(google_place_id: restaurant["place_id"])&.update_attribute(:currently_in_radius, true)
+                    Restaurant.create(
+                        name: restaurant["name"],
+                        address: restaurant["vicinity"],
+                        lat: restaurant["geometry"]["location"]["lat"],
+                        lng: restaurant["geometry"]["location"]["lng"],
+                        distance_in_km: Geocoder::Calculations.distance_between([grouplat, grouplng], [restaurant["geometry"]["location"]["lat"].to_f, restaurant["geometry"]["location"]["lng"].to_f], { units: :km }),
+                        google_rating: restaurant["rating"],
+                        google_place_id: restaurant["place_id"],
+                        group_id: group.id
+                    )
+                end
+            end
+        else
+            restaurants["results"].each do |restaurant|
+                Restaurant.create(
+                    name: restaurant["name"],
+                    address: restaurant["vicinity"],
+                    lat: restaurant["geometry"]["location"]["lat"],
+                    lng: restaurant["geometry"]["location"]["lng"],
+                    distance_in_km: Geocoder::Calculations.distance_between([grouplat, grouplng], [restaurant["geometry"]["location"]["lat"].to_f, restaurant["geometry"]["location"]["lng"].to_f], { units: :km }),
+                    google_rating: restaurant["rating"],
+                    google_place_id: restaurant["place_id"],
+                    group_id: group.id
+                )
+                
+            end
         end
     end
 

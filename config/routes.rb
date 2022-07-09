@@ -2,7 +2,7 @@ Rails.application.routes.draw do
   # For details on the DSL available within this file, see https://guides.rubyonrails.org/routing.html
   namespace :api, defaults: { format: :json } do
     namespace :v1 do
-      resources :groups, only: [ :show, :create ] do
+      resources :groups, only: [ :show, :create, :update ] do
         member do
           post "restaurants_list"
           post "owner_restaurants_list" 

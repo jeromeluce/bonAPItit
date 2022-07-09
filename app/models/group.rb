@@ -4,6 +4,13 @@ class Group < ApplicationRecord
     has_many :restaurants
     validates :name, :address, :radius, presence: true
     validates :radius, numericality: { only_integer: true, greater_than: 999, less_than: 50001 }
+    def geocode
+        res = HTTParty.get("https://api.mapbox.com/geocoding/v5/mapbox.places/#{self.address.parameterize(separator: "%20")}.json?access_token=#{ENV['MAPBOX_API_KEY']}&country=FR")
+        list = JSON.parse res.body
+        coordinates = list["features"][0]["center"]
+        self.latlng = coordinates.reverse.join(",")
+        self.address_visualization = "http://www.google.com/maps/place/#{self.latlng}"
+    end
     private
 
     def generate_codes
@@ -25,11 +32,4 @@ class Group < ApplicationRecord
         end
     end
 
-    def geocode
-        res = HTTParty.get("https://api.mapbox.com/geocoding/v5/mapbox.places/#{self.address.parameterize(separator: "%20")}.json?access_token=#{ENV['MAPBOX_API_KEY']}&country=FR")
-        list = JSON.parse res.body
-        coordinates = list["features"][0]["center"]
-        self.latlng = coordinates.reverse.join(",")
-        self.address_visualization = "http://www.google.com/maps/place/#{self.latlng}"
-    end
 end

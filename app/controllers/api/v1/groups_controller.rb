@@ -1,5 +1,5 @@
 class Api::V1::GroupsController < ActionController::API
-    before_action :set_group, only: [:show, :restaurants_list, :owner_restaurants_list]
+    before_action :set_group, only: [:show, :update, :restaurants_list, :owner_restaurants_list]
     def show
     end
 
@@ -8,6 +8,19 @@ class Api::V1::GroupsController < ActionController::API
         if @group.save
             BuildGroupRestaurantsList.perform_later @group
             render :show, status: :created
+        else
+            render_error
+        end
+    end
+
+    def update
+        if @group.admin_code == params["group"]["admin_code"] && @group.update(group_params)
+            if @group.saved_change_to_radius? || @group.saved_change_to_address?
+                @group.geocode
+                @group.save
+                BuildGroupRestaurantsList.perform_later @group
+            end
+            render :show, status: "200"
         else
             render_error
         end
@@ -23,7 +36,7 @@ class Api::V1::GroupsController < ActionController::API
     end
 
     def owner_restaurants_list
-        if params["group"]["admin_code"] == @group.admin_code
+        if @group.admin_code == params["group"]["admin_code"]
             @restaurants = @group.restaurants.order(Arel.sql('google_rating + cached_weighted_score DESC'))
             render :owner_restaurants_list
         else
@@ -38,7 +51,7 @@ class Api::V1::GroupsController < ActionController::API
     end
 
     def group_params
-        params.require(:group).permit(:name, :address, :radius)
+        params.require(:group).permit(:name, :address, :radius, :admin_code)
     end
 
     def render_error
