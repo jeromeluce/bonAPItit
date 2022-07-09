@@ -28,7 +28,7 @@ class Api::V1::GroupsController < ActionController::API
 
     def restaurants_list
         if params["group"]["registration_code"] == @group.registration_code
-            @restaurants = @group.restaurants.order(google_rating: :desc)
+            @restaurants = @group.restaurants.where(currently_in_radius: true).order(google_rating: :desc)
             render :restaurants_list
         else
             render_unauthorized
@@ -37,7 +37,7 @@ class Api::V1::GroupsController < ActionController::API
 
     def owner_restaurants_list
         if @group.admin_code == params["group"]["admin_code"]
-            @restaurants = @group.restaurants.order(Arel.sql('google_rating + cached_weighted_score DESC'))
+            @restaurants = @group.restaurants.where(currently_in_radius: true).order(Arel.sql('google_rating + cached_weighted_score DESC'))
             render :owner_restaurants_list
         else
             render_unauthorized
