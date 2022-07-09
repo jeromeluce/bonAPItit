@@ -3,7 +3,7 @@ class Group < ApplicationRecord
     has_many :members
     has_many :restaurants
     validates :name, :address, :radius, presence: true
-    validates :name, :address, length: ( minimum: 2, maximum: 200 )
+    validates :name, :address, length: { minimum: 2, maximum: 200 }
     validates :radius, numericality: { only_integer: true, greater_than_or_equal_to: 1000, less_than_or_equal_to: 50000 }
     
     def geocode
