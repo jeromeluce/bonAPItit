@@ -2,61 +2,58 @@
 
 ## Résumé
 
-bonAPItit permet d'organiser des repas en ville satisfaisant le plus grand nombre de personnes ! Particulièrement adapté aux repas entre collègues, bonAPItit vous trouve les meilleurs choix près de votre lieu de travail. 
+bonAPItit permet d'organiser des repas en ville satisfaisant le plus grand nombre de personnes ! Particulièrement adapté aux repas entre collègues, bonAPItit vous trouve les meilleurs choix près de votre lieu de travail (ou autre !). 
 
 Organisez un groupe, donnez le code aux participants, et laissez bonAPItit vous conseiller !
 
 ## Fonctionnalités prévues
 
-Un utilisateur créé un event sur l'API. Il passe les informations suivantes :
-+ Le nom de son événement
-+ Une addresse de départ
-+ Une distance maximale en km
+Un utilisateur créé un groupe sur l'API. Il passe les informations suivantes :
++ Le nom de son groupe (name)
++ Une addresse de départ (address)
++ Une distance maximale en mètres (entier radius, de 1000 à 50000)
 
 L'API lui retourne alors, en cas de succès, les informations suivantes :
-+ Un lien permettant de vérifier la géolocalisation et le rayon choisi 
++ Un lien permettant de vérifier la géolocalisation 
 + Un code utilisateurs à six caractères
 + Son code administrateur à douze caractères
 
-Le code utilisateurs permet aux autres participants de retrouver l'événement et d'entrer leurs préférences (budget, type de nourriture, allergies).
+L'API récupère via Google Places les 20 restaurants les plus pertinents (popularité, note) présents dans le radius donné.
 
-Le code administrateur, lui, permet de modifier les informations de l'événement (localisation, nom, distance max).
+Le code utilisateurs permet à d'autres utilisateurs de s'inscrire à l'événement.
 
-Les autres utilisateurs eux doivent donner à l'API les infos suivantes :
-+ Leur nom
-+ Leur email 
-+ Une string optionnelle d'allergies
-+ Le code utilisateurs
+Pour ce faire, ils donnent à l'API leur nom (name) et le code d'inscription (registration_code).
 
-Ils reçoivent alors :
-+ un code adminuser permettant de changer les informations à la volée.
-+ une liste de types de restaurants disponibles 
+L'API leur retourne alors, en cas de succès, les informations suivantes :
++ Leur nom (name)
++ Leurs allergies (allergies) ou null si vide
++ Leur code (member_code) permettant de modifier leurs infos
+
+Ces utilisateurs peuvent renseigner une liste factultative d'allergies pour en informer l'organisateur, soit à leur inscription à l'évenement, soit plus tard.
+
+Tout utilisateur peut à n'importe quel moment récupérer la liste des 20 restaurants actuellement proposés. Ils sont uniquement classés par pertinence (selon l'API Google Places).
+
+Tout utilisateur peut, pour chaque restaurant de la liste, émettre un vote positif ou négatif. Il ne connait pas les votes des autres, uniquement le créateur du groupe peut obtenir cette information. 
+
+Le code administrateur, lui, permet de modifier les informations de l'événement (adresse, nom, radius).
+
+En cas de changement d'adresse ou de radius, un background job vient mettre à jour la liste.
+
+Les restaurants qui ne se trouvent plus dans la liste après ces changements sont gardés en DB pour garantir la permanence des votes émis.
 
 Sans action de leur part, on suppose qu'ils sont ouverts à tout. Mais un endpoint permet de choisir des types, soit par choix, soit par élimination. 
 
 Un endpoint pour lister les types qu'on veut choisir, un endpoint pour lister les types qu'on veut exclure. 
 
 
-Un endpoint permet au créateur de récupérer une liste classée de restaurants correspondant aux attentes des autres participants. Le créateur peut passer trois valeurs optionnelles :
-+ Le nombre de restaurants à afficher (par défaut, on en retourne jusqu'à 10)
-+ L'heure du repas (par défaut, on suppose un service du midi pour toute requête réalisée avant 14H, service du soir pour toute requête réalisée après 14H)
-+ J'ai de la chance : par défaut false, mais à true renvoie un restaurant au hasard parmis un nombre restaurants passé plus haut (qui devient alors un facteur risque)
+Un endpoint permet au créateur de récupérer une liste classée de restaurants correspondant aux attentes des autres participants (en prenant en compte leurs votes, mais aussi la note donnée par les reviews Google)
 
-Le backend se charge d'envoyer la liste des restaurants correspondant au créateur avec, pour chaque restaurant :
-+ Pourcentage d'adéquation basé sur les choix des utilisateurs (en str, permettant d'avoir une réponse type "non applicable" si aucun utilisateur n'a émis de préférence)
-+ Une note issue d'un site de reviews
 + Nom
-+ Type de restaurant
-+ Localisation
-+ Distance depuis le lieu de travail
++ Distance depuis le lieu de travail (à vol d'oiseau)
++ Nombre de likes
++ Nombre de dislikes
++ Note Google Reviews
 
 De plus, le créateur reçoit aussi :
-+ Nombre final de participants
-+ Liste des allergies
-
-Le classement des restaurants se fait comme suit :
-+ Un agrégat des préférences utilisateurs et notes d'internet, en privilégiant légèrement les notes d'internet
-+ Si aucune préférence, le classement se fait sur les notes d'internet
-+ En cas de notes similaires, le classement va privilégier la proximité géographique du lieu d'origine
-
-Le créateur de l'événement peut retrouver les codes d'accès des participants en cas d'oubli. De plus, il peut supprimer des participants si nécessaire.
++ Nombre total de membres pour son événement
++ Liste des allergies 

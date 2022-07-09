@@ -1,1 +1,1 @@
-json.extract! @member, :id, :name, :allergies, :member_code
+json.extract! @member, :name, :allergies, :member_code

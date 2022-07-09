@@ -1,1 +1,1 @@
-json.extract! @group, :id, :name, :address, :latlng, :address_visualization, :radius
+json.extract! @group, :id, :name, :address, :latlng, :address_visualization, :radius, :registration_code, :admin_code
